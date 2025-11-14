@@ -1,6 +1,10 @@
 # Blog Service Module
 
-A GraphQL extension module for Jahia that provides UGC (User Generated Content) services for blog comments and likes. This module extends the blog-factory module by handling user interactions through GraphQL mutations.
+A GraphQL extension module for Jahia that provides UGC (User Generated Content) services for blog comments and likes. This module extends the blog-factory module by handling user interactions through GraphQL mutations and provides an admin UI for comment moderation.
+
+## Prerequisites
+
+This module depends on the **blog-factory** module, which must be installed first. The blog-factory module provides the blog post content types and structure that this service extends with UGC functionality.
 
 ## Overview
 
@@ -10,6 +14,7 @@ This module is designed similar to the vote-service pattern, providing:
 - **UGC Storage**: Stores comments and likes under `/sites/*/contents/ugc/blogs/` in the LIVE workspace
 - **Duplicate Prevention**: Client and IP-based hash validation to prevent spam
 - **CSRF Protection**: Validates X-CSRF-Token header on all mutations
+- **Admin UI**: Comment moderation interface in Jahia's back-office using Module Federation
 
 ## Architecture
 
@@ -68,11 +73,46 @@ Handles rating persistence and calculation:
 Defined in `definitions.cnd`:
 
 - **jsblognt:comment**: Comment node with content, author info, hashes, and approval status
+  - Properties: `author`, `comment`, `status` (pending/approved/rejected), `approved` (boolean for backwards compatibility)
 - **jsblognt:commentsFolder**: Container for comments
 - **jsblognt:like**: Like node with hashes and timestamps
 - **jsblognt:likesFolder**: Container for likes
 - **jsblognt:rating**: Rating node with rating value (1-5), hashes, and timestamps
 - **jsblognt:ratingsFolder**: Container for ratings
+
+### Admin UI - Comment Moderation
+
+The module includes a React-based admin interface for moderating blog comments, built with Module Federation and integrated into Jahia's back-office.
+
+#### Features
+- **Real-time Stats**: Dashboard showing total, pending, approved, and rejected comment counts
+- **Filter by Status**: View all comments or filter by pending, approved, or rejected
+- **Group by Post**: Comments are organized by blog post with post names displayed
+- **Moderation Actions**:
+  - Approve comments
+  - Reject comments
+  - Delete comments permanently
+- **Auto-refresh**: Manual refresh button to update the comment list
+
+#### Technology Stack
+- **React 18.2.0** with hooks (useMemo, useCallback, useEffect)
+- **Apollo Client 3.8.0** for GraphQL queries and mutations
+- **@jahia/moonstone** UI component library
+- **Module Federation** (Webpack 5) for seamless integration with jContent
+- **react-i18next** for internationalization (English and French)
+
+#### Access
+The moderation interface is accessible in Jahia's back-office under the site administration section. It operates directly on the LIVE workspace, allowing administrators to manage comments that are visible to end users.
+
+#### GraphQL Operations
+The admin UI uses the following GraphQL operations:
+- `GET_ALL_COMMENTS`: Retrieve all comments across all blog posts
+- `GET_POST_BY_ID`: Fetch blog post display names
+- `UPDATE_COMMENT_STATUS`: Update comment status (pending/approved/rejected)
+- `DELETE_COMMENT`: Permanently remove a comment
+
+All operations are performed on the LIVE workspace to ensure immediate visibility of moderation actions.
+
 
 ## GraphQL API
 
@@ -305,9 +345,20 @@ mvn clean install
 
 This will:
 1. Compile all Java sources
-2. Process CND definitions
-3. Package as OSGi bundle with DS annotations
-4. Generate module JAR
+2. Build the React admin UI with Webpack (Module Federation)
+3. Process CND definitions
+4. Package as OSGi bundle with DS annotations
+5. Generate module JAR with both backend services and frontend assets
+
+### Frontend Development
+
+The admin UI source is located in `src/javascript/`. To rebuild just the frontend:
+
+```bash
+npx webpack
+```
+
+The build outputs to `src/main/resources/javascript/apps/` and is automatically included in the module JAR.
 
 ## Deployment
 
@@ -393,6 +444,7 @@ const ratingResult = await jahiaGQL.mutate({
 
 ## Package Structure
 
+### Backend (Java)
 ```
 org.jahia.se.modules.blogservice
 ├── graphql/
@@ -422,6 +474,23 @@ org.jahia.se.modules.blogservice
     ├── HashUtils.java                       - SHA-256 hashing
     ├── IpUtils.java                         - IP extraction and truncation
     └── RequestUtil.java                     - HTTP request extraction
+```
+
+### Frontend (React/Module Federation)
+```
+src/javascript/
+├── CommentModeration/
+│   ├── CommentModeration.jsx                - Main moderation component
+│   ├── CommentModeration.module.scss        - Component styles
+│   └── i18n/
+│       ├── en.json                          - English translations
+│       └── fr.json                          - French translations
+├── gql-queries/
+│   └── CommentModeration.gql-queries.js     - GraphQL queries/mutations
+├── init.js                                   - Module Federation bootstrap
+└── index.js                                  - Entry point
+
+webpack.config.js                             - Webpack 5 + Module Federation config
 ```
 
 ## Utility Functions
