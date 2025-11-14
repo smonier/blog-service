@@ -1,0 +1,11 @@
+.commentModeration {
+    background: var(--color-light);
+    min-height: 100vh;
+
+    .commentBody {
+        max-width: 400px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

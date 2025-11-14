@@ -1,0 +1,78 @@
+Arguments: 
+  /Users/stephane/Runtimes/0.Modules/blog-service/node/node /Users/stephane/Runtimes/0.Modules/blog-service/node/yarn/dist/bin/yarn.js install --frozen-lockfile --network-timeout 1000000
+
+PATH: 
+  /Users/stephane/Runtimes/0.Modules/blog-service/node/yarn/dist/bin:/Users/stephane/Runtimes/0.Modules/blog-service/node:/opt/homebrew/opt/openjdk@17/bin:/Users/stephane/.pyenv/shims:/Users/stephane/.pyenv/bin:/opt/homebrew/opt/openjdk@11/bin:/usr/local/opt/maven/apache-maven-3.8.1/bin:/opt/homebrew/opt/openjdk/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/stephane/.nvm/versions/node/v22.21.0/bin:/opt/homebrew/opt/openjdk@17/bin:/Users/stephane/.pyenv/bin:/opt/homebrew/opt/openjdk@11/bin:/usr/local/opt/maven/apache-maven-3.8.1/bin:/opt/homebrew/opt/openjdk/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pmk/env/global/bin:/Users/stephane/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand:/Users/stephane/.vscode/extensions/vscjava.vscode-java-debug-0.58.3/bundled/scripts/noConfigScripts:
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.12.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/@jahia%2fapollo-dx: Not found
+      at params.callback [as _callback] (/Users/stephane/Runtimes/0.Modules/blog-service/node/yarn/dist/lib/cli.js:66145:18)
+      at self.callback (/Users/stephane/Runtimes/0.Modules/blog-service/node/yarn/dist/lib/cli.js:140890:22)
+      at Request.emit (node:events:513:28)
+      at Request.<anonymous> (/Users/stephane/Runtimes/0.Modules/blog-service/node/yarn/dist/lib/cli.js:141862:10)
+      at Request.emit (node:events:513:28)
+      at IncomingMessage.<anonymous> (/Users/stephane/Runtimes/0.Modules/blog-service/node/yarn/dist/lib/cli.js:141784:12)
+      at Object.onceWrapper (node:events:627:28)
+      at IncomingMessage.emit (node:events:525:35)
+      at endReadableNT (node:internal/streams/readable:1359:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+npm manifest: 
+  {
+    "name": "blog-service",
+    "version": "1.0.0-SNAPSHOT",
+    "description": "Blog Service UI - Comment Moderation",
+    "main": "src/javascript/index.js",
+    "scripts": {
+      "build": "webpack",
+      "watch": "webpack --watch",
+      "lint": "eslint src/javascript"
+    },
+    "dependencies": {
+      "@apollo/client": "^3.7.0",
+      "@jahia/apollo-dx": "^1.0.0",
+      "@jahia/moonstone": "^2.0.0",
+      "@jahia/moonstone-icons": "^2.0.0",
+      "@jahia/ui-extender": "^1.0.0",
+      "graphql": "^16.6.0",
+      "graphql-tag": "^2.12.6",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "react-i18next": "^12.0.0"
+    },
+    "devDependencies": {
+      "@babel/cli": "^7.19.3",
+      "@babel/core": "^7.20.2",
+      "@babel/plugin-proposal-class-properties": "^7.18.6",
+      "@babel/preset-env": "^7.20.2",
+      "@babel/preset-react": "^7.18.6",
+      "babel-loader": "^9.1.0",
+      "css-loader": "^6.7.2",
+      "eslint": "^8.28.0",
+      "eslint-plugin-react": "^7.31.11",
+      "sass": "^1.56.1",
+      "sass-loader": "^13.2.0",
+      "style-loader": "^3.3.1",
+      "webpack": "^5.75.0",
+      "webpack-cli": "^5.0.0"
+    },
+    "peerDependencies": {
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

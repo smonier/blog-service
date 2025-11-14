@@ -1,0 +1,41 @@
+<jnt = 'http://www.jahia.org/jahia/nt/1.0'>
+<jmix = 'http://www.jahia.org/jahia/mix/1.0'>
+<jsblognt = 'http://modules.se.jahia.org/jsblog/nt/1.0'>
+<jsblogmix = 'http://modules.se.jahia.org/jsblog/mix/1.0'>
+
+// UGC node types for blog comments and interactions
+[jsblognt:comment] > jnt:content
+ - blogPostId (string) mandatory
+ - comment (string, textarea) mandatory
+ - author (string)
+ - authorEmail (string)
+ - clientHash (string)
+ - ipHash (string)
+ - ua (string)
+ - ts (date)
+ - approved (boolean) = false
+ - status (string) = 'pending' < 'pending', 'approved', 'rejected'
+
+[jsblognt:commentsFolder] > jnt:contentFolder
+ + * (jsblognt:comment)
+
+[jsblognt:like] > jnt:content
+ - blogPostId (string) mandatory
+ - clientHash (string)
+ - ipHash (string)
+ - ua (string)
+ - ts (date)
+
+[jsblognt:likesFolder] > jnt:contentFolder
+ + * (jsblognt:like)
+
+[jsblognt:rating] > jnt:content
+ - blogPostId (string) mandatory
+ - rating (long) mandatory
+ - clientHash (string)
+ - ipHash (string)
+ - ua (string)
+ - ts (date)
+
+[jsblognt:ratingsFolder] > jnt:contentFolder
+ + * (jsblognt:rating)

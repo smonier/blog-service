@@ -1,0 +1,57 @@
+{
+  "label": {
+    "settings": {
+      "title": "Paramètres du service de blog"
+    },
+    "action": {
+      "title": "Service de blog - Comment étendre l'interface ?"
+    },
+    "appsAccordion": {
+      "title": "Service de blog"
+    }
+  },
+  "moderation": {
+    "menuLabel": "Modération des commentaires de blog",
+    "title": "Modération des commentaires - {siteInfo}",
+    "refresh": "Actualiser",
+    "loading": "Chargement des commentaires...",
+    "postTitle": "Article : {title}",
+    "totalComments": "{count, plural, =0 {Aucun commentaire} one {1 commentaire} other {# commentaires}}",
+    "noComments": "Aucun commentaire à afficher",
+    "error": "Erreur",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.",
+    "stats": {
+      "total": "Total des commentaires",
+      "pending": "En attente",
+      "approved": "Approuvés",
+      "rejected": "Rejetés"
+    },
+    "filter": {
+      "all": "Tous",
+      "pending": "En attente",
+      "approved": "Approuvés",
+      "rejected": "Rejetés"
+    },
+    "action": {
+      "label": "Modérer les commentaires"
+    },
+    "table": {
+      "author": "Auteur",
+      "comment": "Commentaire",
+      "post": "Article",
+      "date": "Date",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "status": {
+      "approved": "approuvé",
+      "rejected": "rejeté",
+      "pending": "en attente"
+    },
+    "actions": {
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "delete": "Supprimer"
+    }
+  }
+}

@@ -1,0 +1,317 @@
+package org.jahia.se.modules.blogservice.graphql;
+
+import graphql.annotations.annotationTypes.GraphQLDescription;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.annotationTypes.GraphQLNonNull;
+import graphql.annotations.annotationTypes.GraphQLTypeExtension;
+import graphql.schema.DataFetchingEnvironment;
+import org.apache.commons.lang3.StringUtils;
+import org.jahia.modules.graphql.provider.dxm.DataFetchingException;
+import org.jahia.modules.graphql.provider.dxm.DXGraphQLProvider;
+import org.jahia.modules.graphql.provider.dxm.osgi.annotations.GraphQLOsgiService;
+import org.jahia.se.modules.blogservice.services.BlogCommentService;
+import org.jahia.se.modules.blogservice.services.BlogConfigurationService;
+import org.jahia.se.modules.blogservice.services.BlogLikeService;
+import org.jahia.se.modules.blogservice.services.BlogRatingService;
+import org.jahia.se.modules.blogservice.services.CommentRequest;
+import org.jahia.se.modules.blogservice.services.CommentResult;
+import org.jahia.se.modules.blogservice.services.LikeRequest;
+import org.jahia.se.modules.blogservice.services.LikeResult;
+import org.jahia.se.modules.blogservice.services.RatingRequest;
+import org.jahia.se.modules.blogservice.services.RatingResult;
+import org.jahia.se.modules.blogservice.services.BlogServiceException;
+import org.jahia.se.modules.blogservice.util.HashUtils;
+import org.jahia.se.modules.blogservice.util.IpUtils;
+import org.jahia.se.modules.blogservice.util.RequestUtil;
+import org.osgi.service.component.annotations.Component;
+
+import javax.inject.Inject;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Calendar;
+import java.util.Optional;
+
+@GraphQLDescription("GraphQL mutations related to blog posts")
+public class BlogMutations {
+
+    private BlogCommentService commentService;
+    private BlogLikeService likeService;
+    private BlogRatingService ratingService;
+    private BlogConfigurationService configurationService;
+
+    @Inject
+    @GraphQLOsgiService
+    public void setCommentService(BlogCommentService commentService) {
+        this.commentService = commentService;
+    }
+
+    @Inject
+    @GraphQLOsgiService
+    public void setLikeService(BlogLikeService likeService) {
+        this.likeService = likeService;
+    }
+
+    @Inject
+    @GraphQLOsgiService
+    public void setRatingService(BlogRatingService ratingService) {
+        this.ratingService = ratingService;
+    }
+
+    @Inject
+    @GraphQLOsgiService
+    public void setConfigurationService(BlogConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
+
+    @GraphQLField
+    @GraphQLName("addComment")
+    @GraphQLDescription("Add a comment to a blog post")
+    public CommentPayload addComment(@GraphQLName("blogPostId") @GraphQLNonNull String blogPostId,
+                                     @GraphQLName("comment") @GraphQLNonNull String comment,
+                                     @GraphQLName("author") String author,
+                                     @GraphQLName("authorEmail") String authorEmail,
+                                     @GraphQLName("clientHash") String clientHashFromClient,
+                                     DataFetchingEnvironment environment) {
+
+        HttpServletRequest request = RequestUtil.extractHttpServletRequest(environment)
+                .orElseThrow(() -> new DataFetchingException("Unable to resolve HTTP request from context"));
+
+        validateCsrf(request);
+
+        String clientFingerprintSource = extractClientIdentifier(request, clientHashFromClient);
+        String computedClientHash = null;
+        if (StringUtils.isNotBlank(clientFingerprintSource)) {
+            computedClientHash = HashUtils.sha256(blogPostId + ":" + clientFingerprintSource);
+        }
+
+        String ipHash = null;
+        String clientIp = IpUtils.extractClientIp(request);
+        String truncatedIp = IpUtils.truncateForHash(clientIp);
+        if (StringUtils.isNotBlank(truncatedIp)) {
+            ipHash = HashUtils.sha256(blogPostId + ":" + truncatedIp);
+        }
+
+        CommentRequest commentRequest = CommentRequest.builder(blogPostId, comment)
+                .withAuthor(author)
+                .withAuthorEmail(authorEmail)
+                .withClientHash(computedClientHash)
+                .withIpHash(ipHash)
+                .withUserAgent(sanitizeUserAgent(request.getHeader("User-Agent")))
+                .withTimestamp(Calendar.getInstance())
+                .build();
+
+        try {
+            CommentResult result = commentService.submit(commentRequest);
+            return new CommentPayload(result);
+        } catch (BlogServiceException e) {
+            throw new DataFetchingException(e);
+        }
+    }
+
+    @GraphQLField
+    @GraphQLName("createComment")
+    @GraphQLDescription("Create a comment for a blog post")
+    public CommentPayload createComment(@GraphQLName("postId") @GraphQLNonNull String postId,
+                                        @GraphQLName("authorName") @GraphQLNonNull String authorName,
+                                        @GraphQLName("authorEmail") String authorEmail,
+                                        @GraphQLName("body") @GraphQLNonNull String body,
+                                        @GraphQLName("token") String token,
+                                        @GraphQLName("clientHash") String clientHashFromClient,
+                                        DataFetchingEnvironment environment) {
+
+        HttpServletRequest request = RequestUtil.extractHttpServletRequest(environment)
+                .orElseThrow(() -> new DataFetchingException("Unable to resolve HTTP request from context"));
+
+        // Validate CSRF token from parameter or header
+        validateCsrfToken(request, token);
+
+        Optional<String> serverSecret = configurationService.getServerSecret();
+        if (serverSecret.isEmpty()) {
+            throw new DataFetchingException("Blog service secret is not configured");
+        }
+
+        String clientFingerprintSource = extractClientIdentifier(request, clientHashFromClient);
+        String computedClientHash = null;
+        if (StringUtils.isNotBlank(clientFingerprintSource)) {
+            computedClientHash = HashUtils.sha256(postId + ":" + clientFingerprintSource + ":" + serverSecret.get());
+        }
+
+        String ipHash = null;
+        if (configurationService.isEnableIpHash()) {
+            String clientIp = IpUtils.extractClientIp(request);
+            String truncatedIp = IpUtils.truncateForHash(clientIp);
+            if (StringUtils.isNotBlank(truncatedIp)) {
+                ipHash = HashUtils.sha256(postId + ":" + truncatedIp + ":" + serverSecret.get());
+            }
+        }
+
+        CommentRequest commentRequest = CommentRequest.builder(postId, body)
+                .withAuthor(authorName)
+                .withAuthorEmail(authorEmail)
+                .withClientHash(computedClientHash)
+                .withIpHash(ipHash)
+                .withUserAgent(sanitizeUserAgent(request.getHeader("User-Agent")))
+                .withTimestamp(Calendar.getInstance())
+                .build();
+
+        try {
+            CommentResult result = commentService.submit(commentRequest);
+            return new CommentPayload(result);
+        } catch (BlogServiceException e) {
+            throw new DataFetchingException(e);
+        }
+    }
+
+    @GraphQLField
+    @GraphQLName("addLike")
+    @GraphQLDescription("Add a like to a blog post")
+    public LikePayload addLike(@GraphQLName("blogPostId") @GraphQLNonNull String blogPostId,
+                               @GraphQLName("clientHash") String clientHashFromClient,
+                               DataFetchingEnvironment environment) {
+
+        HttpServletRequest request = RequestUtil.extractHttpServletRequest(environment)
+                .orElseThrow(() -> new DataFetchingException("Unable to resolve HTTP request from context"));
+
+        validateCsrf(request);
+
+        Optional<String> serverSecret = configurationService.getServerSecret();
+        if (serverSecret.isEmpty()) {
+            throw new DataFetchingException("Blog service secret is not configured");
+        }
+
+        String clientFingerprintSource = extractClientIdentifier(request, clientHashFromClient);
+        String computedClientHash = null;
+        if (StringUtils.isNotBlank(clientFingerprintSource)) {
+            computedClientHash = HashUtils.sha256(blogPostId + ":" + clientFingerprintSource + ":" + serverSecret.get());
+        }
+
+        String ipHash = null;
+        if (configurationService.isEnableIpHash()) {
+            String clientIp = IpUtils.extractClientIp(request);
+            String truncatedIp = IpUtils.truncateForHash(clientIp);
+            if (StringUtils.isNotBlank(truncatedIp)) {
+                ipHash = HashUtils.sha256(blogPostId + ":" + truncatedIp + ":" + serverSecret.get());
+            }
+        }
+
+        LikeRequest likeRequest = LikeRequest.builder(blogPostId)
+                .withClientHash(computedClientHash)
+                .withIpHash(ipHash)
+                .withUserAgent(sanitizeUserAgent(request.getHeader("User-Agent")))
+                .withTimestamp(Calendar.getInstance())
+                .build();
+
+        try {
+            LikeResult result = likeService.submit(likeRequest);
+            return new LikePayload(result);
+        } catch (BlogServiceException e) {
+            throw new DataFetchingException(e);
+        }
+    }
+
+    @GraphQLField
+    @GraphQLName("ratePost")
+    @GraphQLDescription("Rate a blog post with a rating from 1 to 5")
+    public RatingPayload ratePost(@GraphQLName("postId") @GraphQLNonNull String postId,
+                                  @GraphQLName("rating") @GraphQLNonNull int rating,
+                                  @GraphQLName("clientHash") String clientHashFromClient,
+                                  DataFetchingEnvironment environment) {
+
+        HttpServletRequest request = RequestUtil.extractHttpServletRequest(environment)
+                .orElseThrow(() -> new DataFetchingException("Unable to resolve HTTP request from context"));
+
+        validateCsrf(request);
+
+        // Validate rating range
+        if (rating < 1 || rating > 5) {
+            throw new DataFetchingException("Rating must be between 1 and 5");
+        }
+
+        Optional<String> serverSecret = configurationService.getServerSecret();
+        if (serverSecret.isEmpty()) {
+            throw new DataFetchingException("Blog service secret is not configured");
+        }
+
+        String clientFingerprintSource = extractClientIdentifier(request, clientHashFromClient);
+        String computedClientHash = null;
+        if (StringUtils.isNotBlank(clientFingerprintSource)) {
+            computedClientHash = HashUtils.sha256(postId + ":" + clientFingerprintSource + ":" + serverSecret.get());
+        }
+
+        String ipHash = null;
+        if (configurationService.isEnableIpHash()) {
+            String clientIp = IpUtils.extractClientIp(request);
+            String truncatedIp = IpUtils.truncateForHash(clientIp);
+            if (StringUtils.isNotBlank(truncatedIp)) {
+                ipHash = HashUtils.sha256(postId + ":" + truncatedIp + ":" + serverSecret.get());
+            }
+        }
+
+        RatingRequest ratingRequest = RatingRequest.builder()
+                .blogPostId(postId)
+                .rating(rating)
+                .clientHash(computedClientHash)
+                .ipHash(ipHash)
+                .userAgent(sanitizeUserAgent(request.getHeader("User-Agent")))
+                .build();
+
+        try {
+            RatingResult result = ratingService.submit(ratingRequest);
+            return new RatingPayload(result.getBlogPostId(), result.getAverageRating(), result.getRatingCount());
+        } catch (BlogServiceException e) {
+            throw new DataFetchingException(e);
+        }
+    }
+
+    private void validateCsrf(HttpServletRequest request) {
+        validateCsrfToken(request, null);
+    }
+
+    private void validateCsrfToken(HttpServletRequest request, String tokenParam) {
+        // Check parameter first, then header
+        String token = StringUtils.isNotBlank(tokenParam) ? tokenParam : request.getHeader("X-CSRF-Token");
+        
+        // Also try lowercase variant
+        if (StringUtils.isBlank(token)) {
+            token = request.getHeader("x-csrf-token");
+        }
+        
+        if (StringUtils.isBlank(token)) {
+            throw new DataFetchingException("Missing CSRF token. Provide via 'token' parameter or 'X-CSRF-Token' header");
+        }
+    }
+
+    private String extractClientIdentifier(HttpServletRequest request, String clientHashFromClient) {
+        String cookieValue = getCookieValue(request, configurationService.getClientIdCookieName());
+        if (StringUtils.isNotBlank(cookieValue)) {
+            return cookieValue;
+        }
+        if (StringUtils.isNotBlank(clientHashFromClient)) {
+            return clientHashFromClient;
+        }
+        return null;
+    }
+
+    private String sanitizeUserAgent(String userAgent) {
+        if (StringUtils.isBlank(userAgent)) {
+            return null;
+        }
+        String trimmed = userAgent.trim();
+        return trimmed.length() > 512 ? trimmed.substring(0, 512) : trimmed;
+    }
+
+    private String getCookieValue(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+
+        for (Cookie cookie : cookies) {
+            if (name.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+}
