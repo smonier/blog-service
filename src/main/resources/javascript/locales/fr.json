@@ -12,10 +12,10 @@
   },
   "moderation": {
     "menuLabel": "Modération des commentaires de blog",
-    "title": "Modération des commentaires - {siteInfo}",
+    "title": "Modération des commentaires - {{siteInfo}}",
     "refresh": "Actualiser",
     "loading": "Chargement des commentaires...",
-    "postTitle": "Article : {title}",
+    "postTitle": "Article : {{title}}",
     "totalComments": "{count, plural, =0 {Aucun commentaire} one {1 commentaire} other {# commentaires}}",
     "noComments": "Aucun commentaire à afficher",
     "error": "Erreur",

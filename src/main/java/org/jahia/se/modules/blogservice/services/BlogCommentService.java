@@ -119,14 +119,21 @@ public class BlogCommentService {
 
         // Comments require approval based on configuration
         boolean requiresModeration = configurationService.isRequireModeration();
+        logger.info("DEBUG: requiresModeration value from config: {}", requiresModeration);
+        logger.info("DEBUG: Setting approved property to: {}", !requiresModeration);
+        logger.info("DEBUG: Setting status property to: {}", requiresModeration ? "pending" : "approved");
+        
         commentNode.setProperty("approved", !requiresModeration);
         commentNode.setProperty("status", requiresModeration ? "pending" : "approved");
 
         session.save();
         
         if (logger.isInfoEnabled()) {
-            logger.info("Comment persisted for blogPost={} node={} requiresApproval={}", 
-                    request.getBlogPostId(), commentNode.getPath(), configurationService.isRequireModeration());
+            logger.info("Comment persisted for blogPost={} node={} status={} approved={} requiresModeration={}", 
+                    request.getBlogPostId(), commentNode.getPath(), 
+                    commentNode.getProperty("status").getString(),
+                    commentNode.getProperty("approved").getBoolean(),
+                    configurationService.isRequireModeration());
         }
         
         String resultCode = configurationService.isRequireModeration() ? 
@@ -236,18 +243,30 @@ public class BlogCommentService {
         while (iterator.hasNext()) {
             JCRNodeWrapper commentNode = (JCRNodeWrapper) iterator.nextNode();
             if (commentNode.isNodeType("jsblognt:comment")) {
+                // Check status property first, fall back to approved boolean for backwards compatibility
+                String status;
+                if (commentNode.hasProperty("status")) {
+                    status = commentNode.getProperty("status").getString();
+                } else {
+                    boolean approved = commentNode.hasProperty("approved") && commentNode.getProperty("approved").getBoolean();
+                    status = approved ? "approved" : "pending";
+                }
+                
+                // Only return approved comments for public display
+                if (!"approved".equals(status)) {
+                    continue;
+                }
+                
                 String uuid = commentNode.getIdentifier();
                 String authorName = commentNode.hasProperty("author") ? commentNode.getProperty("author").getString() : "Anonymous";
                 String body = commentNode.getProperty("comment").getString();
                 String created = commentNode.getProperty("ts").getDate().toInstant().toString();
-                boolean approved = commentNode.hasProperty("approved") && commentNode.getProperty("approved").getBoolean();
-                String status = approved ? "APPROVED" : "AWAITING_MODERATION";
                 
                 comments.add(new CommentData(uuid, authorName, body, created, status));
             }
         }
         
-        logger.debug("Retrieved {} comments for blogPost={}", comments.size(), blogPostId);
+        logger.debug("Retrieved {} approved comments for blogPost={}", comments.size(), blogPostId);
         return comments;
     }
 

@@ -81,11 +81,11 @@ public class BlogConfigurationService {
         @AttributeDefinition(
                 name = "Enable IP hash",
                 description = "If enabled, blog interactions will also record an anonymised hash of the caller IP address.")
-        boolean enableIpHash() default true;
+        boolean enableIpHash() default false;
 
         @AttributeDefinition(
                 name = "Require comment moderation",
                 description = "If enabled, all comments will require approval before being visible.")
-        boolean requireModeration() default true;
+        boolean requireModeration() default false;
     }
 }

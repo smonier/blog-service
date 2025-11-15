@@ -1,0 +1,57 @@
+{
+  "label": {
+    "settings": {
+      "title": "Configuración del servicio de blog"
+    },
+    "action": {
+      "title": "Servicio de blog - ¿Cómo extender la interfaz?"
+    },
+    "appsAccordion": {
+      "title": "Servicio de blog"
+    }
+  },
+  "moderation": {
+    "menuLabel": "Moderación de comentarios de blog",
+    "title": "Moderación de comentarios - {{siteInfo}}",
+    "refresh": "Actualizar",
+    "loading": "Cargando comentarios...",
+    "postTitle": "Publicación: {{title}}",
+    "totalComments": "{count, plural, =0 {Sin comentarios} one {1 comentario} other {# comentarios}}",
+    "noComments": "No hay comentarios para mostrar",
+    "error": "Error",
+    "confirmDelete": "¿Está seguro de que desea eliminar este comentario? Esta acción no se puede deshacer.",
+    "stats": {
+      "total": "Total de comentarios",
+      "pending": "Pendientes",
+      "approved": "Aprobados",
+      "rejected": "Rechazados"
+    },
+    "filter": {
+      "all": "Todos",
+      "pending": "Pendientes",
+      "approved": "Aprobados",
+      "rejected": "Rechazados"
+    },
+    "action": {
+      "label": "Moderar comentarios"
+    },
+    "table": {
+      "author": "Autor",
+      "comment": "Comentario",
+      "post": "Publicación",
+      "date": "Fecha",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "status": {
+      "approved": "aprobado",
+      "rejected": "rechazado",
+      "pending": "pendiente"
+    },
+    "actions": {
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "delete": "Eliminar"
+    }
+  }
+}

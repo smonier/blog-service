@@ -25,8 +25,8 @@ Manages runtime configuration with the following settings:
 
 - **serverSecret**: Secret used to hash client identifiers and IPs (must be changed in production)
 - **clientIdCookieName**: Name of the cookie containing client identifier (default: `jahia-client-id`)
-- **enableIpHash**: Whether to hash and store IP addresses (default: `true`)
-- **requireModeration**: Whether comments need approval before being visible (default: `true`)
+- **enableIpHash**: Whether to hash and store IP addresses (default: `false`)
+- **requireModeration**: Whether comments need approval before being visible (default: `false`)
 
 Configuration file: `META-INF/configurations/org.jahia.se.modules.blogservice.cfg`
 
@@ -103,6 +103,8 @@ The module includes a React-based admin interface for moderating blog comments, 
 
 #### Access
 The moderation interface is accessible in Jahia's back-office under the site administration section. It operates directly on the LIVE workspace, allowing administrators to manage comments that are visible to end users.
+
+![Comment Moderation Interface](./src/main/resources/images/comments-moderation.png)
 
 #### GraphQL Operations
 The admin UI uses the following GraphQL operations:

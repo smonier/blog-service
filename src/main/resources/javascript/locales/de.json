@@ -1,0 +1,57 @@
+{
+  "label": {
+    "settings": {
+      "title": "Blog-Dienst-Einstellungen"
+    },
+    "action": {
+      "title": "Blog-Dienst - Wie erweitert man die Benutzeroberfläche?"
+    },
+    "appsAccordion": {
+      "title": "Blog-Dienst"
+    }
+  },
+  "moderation": {
+    "menuLabel": "Blog-Kommentar-Moderation",
+    "title": "Kommentar-Moderation - {{siteInfo}}",
+    "refresh": "Aktualisieren",
+    "loading": "Kommentare werden geladen...",
+    "postTitle": "Beitrag: {{title}}",
+    "totalComments": "{count, plural, =0 {Keine Kommentare} one {1 Kommentar} other {# Kommentare}}",
+    "noComments": "Keine Kommentare zum Anzeigen",
+    "error": "Fehler",
+    "confirmDelete": "Sind Sie sicher, dass Sie diesen Kommentar löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "stats": {
+      "total": "Kommentare gesamt",
+      "pending": "Ausstehend",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
+    },
+    "filter": {
+      "all": "Alle",
+      "pending": "Ausstehend",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
+    },
+    "action": {
+      "label": "Kommentare moderieren"
+    },
+    "table": {
+      "author": "Autor",
+      "comment": "Kommentar",
+      "post": "Beitrag",
+      "date": "Datum",
+      "status": "Status",
+      "actions": "Aktionen"
+    },
+    "status": {
+      "approved": "genehmigt",
+      "rejected": "abgelehnt",
+      "pending": "ausstehend"
+    },
+    "actions": {
+      "approve": "Genehmigen",
+      "reject": "Ablehnen",
+      "delete": "Löschen"
+    }
+  }
+}
