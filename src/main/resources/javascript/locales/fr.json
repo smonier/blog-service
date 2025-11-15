@@ -12,7 +12,7 @@
   },
   "moderation": {
     "menuLabel": "Modération des commentaires de blog",
-    "title": "Modération des commentaires - {{siteInfo}}",
+    "title": "Modération des commentaires de Blog- {{siteInfo}}",
     "refresh": "Actualiser",
     "loading": "Chargement des commentaires...",
     "postTitle": "Article : {{title}}",
