@@ -14,7 +14,10 @@ const CommentModeration = ({siteKey, lang}) => {
 
     // GraphQL query to fetch comments
     const {data, loading, error, refetch} = useQuery(GET_ALL_COMMENTS, {
-        variables: {lang: lang || 'en'},
+        variables: {
+            lang: lang || 'en',
+            sitePath: `/sites/${siteKey}/contents/ugc/blogs`
+        },
         fetchPolicy: 'cache-first',
         notifyOnNetworkStatusChange: false
     });

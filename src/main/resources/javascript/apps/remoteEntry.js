@@ -126,7 +126,7 @@ __webpack_require__.d(exports, {
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + ".blogService." + "9c2e8d" + ".js";
+/******/ 			return "" + chunkId + ".blogService." + "e28738" + ".js";
 /******/ 		};
 /******/ 	})();
 /******/ 	

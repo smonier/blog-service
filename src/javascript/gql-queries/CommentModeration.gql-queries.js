@@ -1,11 +1,12 @@
 import {gql} from '@apollo/client';
 
 export const GET_ALL_COMMENTS = gql`
-    query GetAllComments($lang: String!) {
+    query GetAllComments($lang: String!, $sitePath: String!) {
         jcr(workspace: LIVE) {
             nodesByCriteria(criteria: {
                 nodeType: "jsblognt:comment",
-                language: $lang
+                language: $lang,
+                paths: [$sitePath]
             }) {
                 nodes {
                     uuid
