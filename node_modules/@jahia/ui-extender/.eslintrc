@@ -1,5 +1,0 @@
-{
-  "extends": ["@jahia", "plugin:@typescript-eslint/recommended"],
-  "plugins": ["json"],
-  "parser": "@typescript-eslint/parser"
-}
